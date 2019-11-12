@@ -13,17 +13,12 @@ namespace collegues_api.Services
     {
         private Dictionary<String, Collegue> data = new Dictionary<string, Collegue>();
         private readonly IMapper _mapper;
+        private readonly ColleguesContext _colleguesContext;
 
-        public CollegueService(IMapper mapper)
+        public CollegueService(IMapper mapper, ColleguesContext colleguesContext)
         {
             _mapper = mapper;
-            var collegue1 = new Collegue(Guid.NewGuid().ToString(), "Dupuis", "Jean", "jean.dupuis@mail.com", new DateTime(1980, 1, 18), "https://img.huffingtonpost.com/asset/5901e5881400002000a9c22f.jpeg?ops=scalefit_720_noupscale");
-            var collegue2 = new Collegue(Guid.NewGuid().ToString(), "Durand", "Bernard", "bernard.durand@mail.com", new DateTime(1982, 11, 23), "https://secure.i.telegraph.co.uk/multimedia/archive/03127/terry_crews_3127762b.jpg");
-            var collegue3 = new Collegue(Guid.NewGuid().ToString(), "Doe", "John", "john.doe@mail.com", new DateTime(1984, 8, 2), "https://secure.i.telegraph.co.uk/multimedia/archive/03029/Becks1_5_3029072b.jpg");
-
-            data.Add(collegue1.Matricule, collegue1);
-            data.Add(collegue2.Matricule, collegue2);
-            data.Add(collegue3.Matricule, collegue3);
+            _colleguesContext = colleguesContext;
         }
 
         public IEnumerable<string> RechercherParNom(string nom)
@@ -49,8 +44,12 @@ namespace collegues_api.Services
             {
                 var collegue = _mapper.Map<ColleguePostDto, Collegue>(collegueDto);
                 collegue.Matricule = Guid.NewGuid().ToString();
-                data.Add(collegue.Matricule, collegue);
-                return collegue;
+                _colleguesContext.Collegues.Add(collegue);
+                _colleguesContext.SaveChanges();
+
+                return (from co in _colleguesContext.Collegues
+                        where co.Matricule == collegue.Matricule
+                        select co).Single();
             }
             else
             {

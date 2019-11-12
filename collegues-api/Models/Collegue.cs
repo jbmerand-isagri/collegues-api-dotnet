@@ -1,17 +1,28 @@
-﻿using System;
+﻿using collegues_api.Validators;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace collegues_api.Models
 {
+    [Table("COLLEGUES")]
     public class Collegue
     {
+        [Key]
         public string Matricule { get; set; }
+        [MaxLength(255), MinLength(2)]
         public string Nom { get; set; }
+        [MaxLength(255), MinLength(2)]
         public string Prenoms { get; set; }
+        [MaxLength(255), MinLength(3)]
+        [EmailAddress]
         public string Email { get; set; }
+        [CustomValidation(typeof(AgeValidation), nameof(AgeValidation.AgeValidate))]
         public DateTime DateDeNaissance { get; set; }
+        [RegularExpression(@"^(http.*$).*")]
         public string PhotoUrl { get; set; }
 
         public Collegue()
