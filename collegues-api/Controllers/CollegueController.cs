@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using collegues_api.Controllers.Dto;
 using collegues_api.Models;
 using collegues_api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -18,14 +20,14 @@ namespace collegues_api.Controllers
             _collegueService = collegueService;
         }
 
-        // GET: collegues?nom=xxx
+        // GET: collegues?nom=NOM
         [HttpGet]
         public IEnumerable<string> GetMatriculeFromName(string nom)
         {
             return this._collegueService.RechercherParNom(nom);
         }
 
-        // GET collegues/xxx
+        // GET collegues/MATRICULE
         [HttpGet("{matricule}")]
         public IActionResult GetCollegueFromMatricule(string matricule)
         {
@@ -45,7 +47,18 @@ namespace collegues_api.Controllers
         {
             try
             {
-                return Ok(_collegueService.AjouterUnCollegue(collegueDto));
+                var context = new ValidationContext(collegueDto);
+                ICollection<ValidationResult> result = null;
+                var isValid = Validator.TryValidateObject(collegueDto, context, result, true);
+
+                if (isValid)
+                {
+                    return Ok(_collegueService.AjouterUnCollegue(collegueDto));
+                }
+                else
+                {
+                    return BadRequest();
+                }
             }
             catch(Exception)
             {
@@ -54,10 +67,29 @@ namespace collegues_api.Controllers
             
         }
 
-        // PUT api/<controller>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        // PATCH collegues/MATRICULE
+        [HttpPatch("{matricule}")]
+        public IActionResult PatchColleague(string matricule, [FromBody]ColleguePatchDto collegueDto)
         {
+            try
+            {
+                collegueDto.Matricule = matricule;
+                var collegue = _collegueService.RechercherParMatricule(matricule);
+                return Ok(_collegueService.ModifierCollegue(collegueDto));
+            }
+            catch(CollegueNonTrouveException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (CollegueInvalideException e)
+            {
+                return BadRequest(e.Message);
+            }
+            catch (Exception)
+            {
+                return BadRequest("Une erreur est survenue");
+            }
+            
         }
 
         // DELETE api/<controller>/5

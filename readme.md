@@ -4,11 +4,11 @@ Projet de création d'une RestAPI développée avec .NET Core.
 
 Requêtes :
 
-[GET] /collegues?nom=Dupuis
+## [GET] /collegues?nom=Dupuis
 
 Retourne un tableau des matricules des collègues portant ce nom.
 
-[GET] /collegues/[matricule]
+## [GET] /collegues/[matricule]
 
 Retourne un JSON du collègue trouvé ou une erreur 404 si non trouvé.
 
@@ -25,7 +25,7 @@ Code `200` si réussite avec réponse :
 }
 ```
 
-[POST] /collegues
+## [POST] /collegues
 ```JSON
 {
     "nom": "Dupuis",
@@ -55,3 +55,28 @@ Si succès : `code 200`
 ```
 
 Si échec : `code 400`
+
+## [PATCH] /collegues/[matricule]
+```JSON
+{
+    "email": "jean.dupuis@mail.fr",
+    "photoUrl": "http://img.com"
+}
+```
+
+Modifie un collègue (que email ou photoUrl possible, sinon les deux)
+
+Si succès : `200`
+```JSON
+{
+    "matricule": "acf0ff79-3dba-4e4b-a401-1819023d7ae8",
+    "nom": "Dupuis",
+    "prenoms": "Jean",
+    "email": "jean.dupuis@mail.fr",
+    "dateDeNaissance": "2000-01-18T00:00:00",
+    "photoUrl": "http://img.com"
+}
+```
+
+Si échec : `code 400` (requête invalide) ou `code 404` (collègue non trouvé)
+

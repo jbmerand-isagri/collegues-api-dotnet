@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using collegues_api.Configurations;
+using collegues_api.Controllers.Dto;
 
 namespace collegues_api.Services
 {
@@ -44,29 +45,64 @@ namespace collegues_api.Services
 
         public Collegue AjouterUnCollegue(ColleguePostDto collegueDto)
         {
-            if(collegueDto != null && collegueDto.DateDeNaissance != null)
+            if (collegueDto != null)
             {
                 var collegue = _mapper.Map<ColleguePostDto, Collegue>(collegueDto);
-
-                TimeSpan span = DateTime.Now - collegue.DateDeNaissance;
-                int years = (new DateTime(1, 1, 1) + span).Year - 1;
-
-                if (collegue.Nom.Length >= 2 && collegue.Prenoms.Length >= 2 && collegue.Email.Length >= 3
-                && collegue.Email.Contains("@") && collegue.PhotoUrl.StartsWith("http") && years >= 18)
-                {
-                    collegue.Matricule = Guid.NewGuid().ToString();
-                    data.Add(collegue.Matricule, collegue);
-                    return collegue;
-                }
-                else
-                {
-                    throw new CollegueInvalideException("Erreur : au moins une des valeurs ne respecte pas le format");
-                }
+                collegue.Matricule = Guid.NewGuid().ToString();
+                data.Add(collegue.Matricule, collegue);
+                return collegue;
             }
             else
             {
                 throw new CollegueInvalideException("Erreur : impossible de récupérer de telles données");
             }
+        }
+
+        public Collegue ModifierEmail(ColleguePatchDto collegueDto)
+        {
+            if (collegueDto.Email != null && collegueDto.Email.Length >= 3 && collegueDto.Email.Contains("@"))
+            {
+                data[collegueDto.Matricule].Email = collegueDto.Email;
+                return data[collegueDto.Matricule];
+            }
+            else
+            {
+                throw new CollegueInvalideException("Erreur : cet email ne respecte pas le format imposé");
+            }
+        }
+
+        public Collegue ModifierPhotoUrl(ColleguePatchDto collegueDto)
+        {
+            if (collegueDto.PhotoUrl != null && collegueDto.PhotoUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            {
+                data[collegueDto.Matricule].PhotoUrl = collegueDto.PhotoUrl.ToLower();
+                return data[collegueDto.Matricule];
+            }
+            else
+            {
+                throw new CollegueInvalideException("Erreur : cette url ne commence pas par http");
+            }
+        }
+
+        public Collegue ModifierCollegue(ColleguePatchDto collegueDto)
+        {
+            try
+            {
+                data.ContainsKey(collegueDto.Matricule);
+                if (collegueDto.Email != null)
+                {
+                    ModifierEmail(collegueDto);
+                }
+                if (collegueDto.PhotoUrl != null)
+                {
+                    ModifierPhotoUrl(collegueDto);
+                }
+            }
+            catch(ArgumentNullException)
+            {
+                throw new CollegueNonTrouveException("Erreur : matricule non trouvé");
+            }
+            return data[collegueDto.Matricule];
         }
 
     }
