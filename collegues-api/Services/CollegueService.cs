@@ -44,18 +44,29 @@ namespace collegues_api.Services
 
         public Collegue AjouterUnCollegue(ColleguePostDto collegueDto)
         {
-            /* var config = new MapperConfiguration(cfg =>
-             {
-                 CreateMap<ColleguePostDto, Collegue>();
-             });*/
+            if(collegueDto != null && collegueDto.DateDeNaissance != null)
+            {
+                var collegue = _mapper.Map<ColleguePostDto, Collegue>(collegueDto);
 
-            /*            IMapper iMapper = _mapper.CreateMapper();
-                        var destination = iMapper.Map<ColleguePostDto, Collegue>(collegueDto);*/
+                TimeSpan span = DateTime.Now - collegue.DateDeNaissance;
+                int years = (new DateTime(1, 1, 1) + span).Year - 1;
 
-            var destination = _mapper.Map<ColleguePostDto, Collegue>(collegueDto);
-
-            return destination;
-
+                if (collegue.Nom.Length >= 2 && collegue.Prenoms.Length >= 2 && collegue.Email.Length >= 3
+                && collegue.Email.Contains("@") && collegue.PhotoUrl.StartsWith("http") && years >= 18)
+                {
+                    collegue.Matricule = Guid.NewGuid().ToString();
+                    data.Add(collegue.Matricule, collegue);
+                    return collegue;
+                }
+                else
+                {
+                    throw new CollegueInvalideException("Erreur : au moins une des valeurs ne respecte pas le format");
+                }
+            }
+            else
+            {
+                throw new CollegueInvalideException("Erreur : impossible de récupérer de telles données");
+            }
         }
 
     }

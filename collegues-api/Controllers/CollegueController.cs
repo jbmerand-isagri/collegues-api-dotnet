@@ -47,9 +47,9 @@ namespace collegues_api.Controllers
             {
                 return Ok(_collegueService.AjouterUnCollegue(collegueDto));
             }
-            catch(Exception e)
+            catch(Exception)
             {
-                return BadRequest(e);
+                return BadRequest();
             }
             
         }
