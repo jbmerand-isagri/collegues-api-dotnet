@@ -2,6 +2,10 @@
 
 Projet de création d'une RestAPI développée avec .NET Core.
 
+### Ligne de commande pour lancer la base de données via Docker
+
+`docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 postgres`
+
 Requêtes :
 
 ## [GET] /collegues?nom=Dupuis

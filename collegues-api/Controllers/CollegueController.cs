@@ -32,10 +32,10 @@ namespace collegues_api.Controllers
         public IActionResult GetCollegueFromMatricule(string matricule)
         {
             try
-            { 
+            {
                 return Ok(_collegueService.RechercherParMatricule(matricule));
             }
-            catch(CollegueInvalideException) 
+            catch (CollegueInvalideException)
             {
                 return NotFound();
             }
@@ -60,11 +60,10 @@ namespace collegues_api.Controllers
                     return BadRequest();
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
                 return BadRequest();
             }
-            
         }
 
         // PATCH collegues/MATRICULE
@@ -77,7 +76,7 @@ namespace collegues_api.Controllers
                 var collegue = _collegueService.RechercherParMatricule(matricule);
                 return Ok(_collegueService.ModifierCollegue(collegueDto));
             }
-            catch(CollegueNonTrouveException e)
+            catch (CollegueNonTrouveException e)
             {
                 return NotFound(e.Message);
             }
@@ -89,7 +88,6 @@ namespace collegues_api.Controllers
             {
                 return BadRequest("Une erreur est survenue");
             }
-            
         }
 
         // DELETE api/<controller>/5

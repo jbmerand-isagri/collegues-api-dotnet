@@ -1,6 +1,7 @@
 
 using AutoMapper;
 using collegues_api.Configurations;
+using collegues_api.Repositories;
 using collegues_api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -25,6 +26,7 @@ namespace collegues_api
         {
             services.AddControllers();
             services.AddScoped<ICollegueService, CollegueService>();
+            services.AddScoped<ICollegueRepository, CollegueRepository>();
             services.AddAutoMapper(typeof(OrganizationProfile));
 
             services.AddDbContext<ColleguesContext>(options =>
