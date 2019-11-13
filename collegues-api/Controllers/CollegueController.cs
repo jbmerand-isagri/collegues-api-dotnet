@@ -89,11 +89,5 @@ namespace collegues_api.Controllers
                 return BadRequest("Une erreur est survenue");
             }
         }
-
-        // DELETE api/<controller>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }
