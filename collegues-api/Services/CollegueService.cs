@@ -1,14 +1,17 @@
 ﻿using AutoMapper;
-using collegues_api.Models;
+using ColleguesApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using collegues_api.Configurations;
-using collegues_api.Controllers.Dto;
-using collegues_api.Repositories;
+using ColleguesApi.Configurations;
+using ColleguesApi.Controllers.Dto;
+using ColleguesApi.Repositories;
+using System.Resources;
+using System.Reflection;
+using System.Globalization;
 
-namespace collegues_api.Services
+namespace ColleguesApi.Services
 {
     public class CollegueService : ICollegueService
     {
@@ -21,17 +24,17 @@ namespace collegues_api.Services
             _collegueRepository = collegueRepository;
         }
 
-        public IEnumerable<string> RechercherParNom(string nom)
+        public Task<IEnumerable<string>> RechercherParNom(string nom)
         {
-            return _collegueRepository.GetColleagueMatriculesByNom(nom);
+            return _collegueRepository.GetColleagueMatriculesByNomAsync(nom);
         }
 
-        public Collegue RechercherParMatricule(string matricule)
+        public Task<Collegue> RechercherParMatricule(string matricule)
         {
-            return _collegueRepository.FindColleagueByMatricule(matricule);
+            return _collegueRepository.FindColleagueByMatriculeAsync(matricule);
         }
 
-        public Collegue AjouterUnCollegue(ColleguePostDto collegueDto)
+        public Task<Collegue> AjouterUnCollegue(ColleguePostDto collegueDto)
         {
             if (collegueDto != null)
             {
@@ -39,30 +42,35 @@ namespace collegues_api.Services
                 collegue.Matricule = Guid.NewGuid().ToString();
                 try
                 {
-                    _collegueRepository.SaveColleague(collegue);
+                    _collegueRepository.SaveColleagueAsync(collegue);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    throw new ProblemeTechniqueException(e.Message);
+                    throw new ProblemeTechniqueException();
                 }
                 return RechercherParMatricule(collegue.Matricule);
             }
             else
             {
-                throw new CollegueInvalideException("Erreur : impossible de récupérer de telles données");
+                throw new CollegueInvalideException();
             }
         }
 
-        public Collegue ModifierCollegue(ColleguePatchDto collegueDto)
+        public Task<Collegue> ModifierCollegue(ColleguePatchDto collegueDto)
         {
+            if (collegueDto == null)
+            {
+                throw new CollegueInvalideException();
+            }
+
             try
             {
-                _collegueRepository.UpdateColleague(collegueDto);
-                return _collegueRepository.FindColleagueByMatricule(collegueDto.Matricule);
+                _collegueRepository.UpdateColleagueAsync(collegueDto);
+                return _collegueRepository.FindColleagueByMatriculeAsync(collegueDto.Matricule);
             }
             catch (ArgumentNullException)
             {
-                throw new CollegueNonTrouveException("Erreur : matricule non trouvé");
+                throw new CollegueNonTrouveException();
             }
             catch (Exception e)
             {

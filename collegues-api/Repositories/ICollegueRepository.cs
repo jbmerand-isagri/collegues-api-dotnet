@@ -1,18 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using collegues_api.Controllers.Dto;
-using collegues_api.Models;
+using System.Threading.Tasks;
+using ColleguesApi.Controllers.Dto;
+using ColleguesApi.Models;
 
-namespace collegues_api.Repositories
+namespace ColleguesApi.Repositories
 {
     public interface ICollegueRepository
     {
-        Collegue FindColleagueByMatricule(string matricule);
+        Task<Collegue> FindColleagueByMatriculeAsync(string matricule);
 
-        IEnumerable<string> GetColleagueMatriculesByNom(string nom);
+        Task<IEnumerable<string>> GetColleagueMatriculesByNomAsync(string nom);
 
-        void SaveColleague(Collegue collegue);
+        void SaveColleagueAsync(Collegue collegue);
 
-        void UpdateColleague(ColleguePatchDto collegueDto);
+        void UpdateColleagueAsync(ColleguePatchDto collegueDto);
     }
 }

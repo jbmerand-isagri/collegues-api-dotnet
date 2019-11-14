@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace collegues_api.Services
+namespace ColleguesApi.Services
 {
     [Serializable]
-    internal class CollegueNonTrouveException : Exception
+    public class CollegueNonTrouveException : Exception
     {
         public CollegueNonTrouveException()
         {

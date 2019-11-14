@@ -17,6 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\collegues-api\collegues-api.csproj" />
+    <ProjectReference Include="..\collegues-api\ColleguesApi.csproj" />
   </ItemGroup>
 </Project>

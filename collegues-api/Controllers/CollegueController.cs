@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using collegues_api.Controllers.Dto;
-using collegues_api.Models;
-using collegues_api.Services;
+using System.Threading.Tasks;
+using ColleguesApi.Controllers.Dto;
+using ColleguesApi.Models;
+using ColleguesApi.Repositories;
+using ColleguesApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
-namespace collegues_api.Controllers
+namespace ColleguesApi.Controllers
 {
     [Route("collegues")]
     public class CollegueController : Controller
@@ -22,22 +22,30 @@ namespace collegues_api.Controllers
 
         // GET: collegues?nom=NOM
         [HttpGet]
-        public IEnumerable<string> GetMatriculeFromName(string nom)
+        public Task<IEnumerable<string>> GetMatriculeFromNameAsync(string nom)
         {
-            return this._collegueService.RechercherParNom(nom);
+            return _collegueService.RechercherParNom(nom);
         }
 
         // GET collegues/MATRICULE
         [HttpGet("{matricule}")]
-        public IActionResult GetCollegueFromMatricule(string matricule)
+        public IActionResult GetCollegueFromMatriculeAsync(string matricule)
         {
             try
             {
-                return Ok(_collegueService.RechercherParMatricule(matricule));
+                return Ok(_collegueService.RechercherParMatricule(matricule).Result);
             }
             catch (CollegueInvalideException)
             {
+                return BadRequest();
+            }
+            catch (CollegueNonTrouveException)
+            {
                 return NotFound();
+            }
+            catch (ProblemeTechniqueException)
+            {
+                return BadRequest();
             }
         }
 
@@ -53,14 +61,18 @@ namespace collegues_api.Controllers
 
                 if (isValid)
                 {
-                    return Ok(_collegueService.AjouterUnCollegue(collegueDto));
+                    return Ok(_collegueService.AjouterUnCollegue(collegueDto).Result);
                 }
                 else
                 {
                     return BadRequest();
                 }
             }
-            catch (Exception)
+            catch (ArgumentNullException)
+            {
+                return BadRequest();
+            }
+            catch (ProblemeTechniqueException)
             {
                 return BadRequest();
             }
@@ -68,25 +80,32 @@ namespace collegues_api.Controllers
 
         // PATCH collegues/MATRICULE
         [HttpPatch("{matricule}")]
-        public IActionResult PatchColleague(string matricule, [FromBody]ColleguePatchDto collegueDto)
+        public IActionResult PatchColleagueAsync(string matricule, [FromBody]ColleguePatchDto collegueDto)
         {
             try
             {
-                collegueDto.Matricule = matricule;
-                var collegue = _collegueService.RechercherParMatricule(matricule);
-                return Ok(_collegueService.ModifierCollegue(collegueDto));
+                if (collegueDto != null)
+                {
+                    collegueDto.Matricule = matricule;
+                    var collegue = _collegueService.RechercherParMatricule(matricule);
+                    return Ok(_collegueService.ModifierCollegue(collegueDto).Result);
+                }
+                else
+                {
+                    throw new CollegueInvalideException();
+                }
             }
-            catch (CollegueNonTrouveException e)
+            catch (CollegueNonTrouveException)
             {
-                return NotFound(e.Message);
+                return NotFound();
             }
-            catch (CollegueInvalideException e)
+            catch (CollegueInvalideException)
             {
-                return BadRequest(e.Message);
+                return BadRequest();
             }
-            catch (Exception)
+            catch (ProblemeTechniqueException)
             {
-                return BadRequest("Une erreur est survenue");
+                return BadRequest();
             }
         }
     }

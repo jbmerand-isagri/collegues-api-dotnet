@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace collegues_api.Services
+namespace ColleguesApi.Services
 {
     [Serializable]
-    internal class CollegueInvalideException : Exception
+    public class CollegueInvalideException : Exception
     {
         public CollegueInvalideException()
         {

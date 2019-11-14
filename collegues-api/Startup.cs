@@ -1,8 +1,7 @@
-
 using AutoMapper;
-using collegues_api.Configurations;
-using collegues_api.Repositories;
-using collegues_api.Services;
+using ColleguesApi.Configurations;
+using ColleguesApi.Repositories;
+using ColleguesApi.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace collegues_api
+namespace ColleguesApi
 {
     public class Startup
     {
@@ -33,9 +32,9 @@ namespace collegues_api
                 options.UseNpgsql(Configuration.GetConnectionString("ColleguesContext")));
         }
 
-            // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-         {
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

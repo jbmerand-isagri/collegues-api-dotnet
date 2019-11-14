@@ -3,23 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace collegues_api.Controllers.Dto
+namespace ColleguesApi.Controllers.Dto
 {
     public class ColleguePatchDto
     {
         public string Matricule { get; set; }
         public string Email { get; set; }
-        public string PhotoUrl { get; set; }
+        public Uri PhotoUrl { get; set; }
 
         public ColleguePatchDto()
         {
         }
 
-        public ColleguePatchDto(string matricule, string email, string photoUrl)
+        public ColleguePatchDto(string matricule, string email, Uri photoUrl)
         {
-            this.Matricule = matricule;
-            this.Email = email;
-            this.PhotoUrl = photoUrl;
+            Matricule = matricule;
+            Email = email;
+            PhotoUrl = photoUrl;
         }
     }
 }

@@ -1,17 +1,18 @@
 ﻿using System.Collections.Generic;
-using collegues_api.Controllers.Dto;
-using collegues_api.Models;
+using System.Threading.Tasks;
+using ColleguesApi.Controllers.Dto;
+using ColleguesApi.Models;
 
-namespace collegues_api.Services
+namespace ColleguesApi.Services
 {
     public interface ICollegueService
     {
-        IEnumerable<string> RechercherParNom(string nom);
+        Task<IEnumerable<string>> RechercherParNom(string nom);
 
-        Collegue RechercherParMatricule(string matricule);
+        Task<Collegue> RechercherParMatricule(string matricule);
 
-        Collegue AjouterUnCollegue(ColleguePostDto collegueAAjouter);
+        Task<Collegue> AjouterUnCollegue(ColleguePostDto collegueAAjouter);
 
-        Collegue ModifierCollegue(ColleguePatchDto collegueDto);
+        Task<Collegue> ModifierCollegue(ColleguePatchDto collegueDto);
     }
 }

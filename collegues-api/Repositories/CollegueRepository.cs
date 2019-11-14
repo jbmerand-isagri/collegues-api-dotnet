@@ -1,13 +1,19 @@
-﻿using collegues_api.Configurations;
-using collegues_api.Controllers.Dto;
-using collegues_api.Models;
-using collegues_api.Services;
+﻿using ColleguesApi.Configurations;
+using ColleguesApi.Controllers.Dto;
+using ColleguesApi.Models;
+using ColleguesApi.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Reflection;
+using System.Resources;
+using System.Threading.Tasks;
 
-namespace collegues_api.Repositories
+namespace ColleguesApi.Repositories
 {
     public class CollegueRepository : ICollegueRepository
     {
@@ -18,17 +24,26 @@ namespace collegues_api.Repositories
             _colleguesContext = colleguesContext;
         }
 
-        public void SaveColleague(Collegue collegue)
+        public async void SaveColleagueAsync(Collegue collegue)
         {
             _colleguesContext.Collegues.Add(collegue);
-            _colleguesContext.SaveChanges();
+            await _colleguesContext.SaveChangesAsync()
+                .ConfigureAwait(false);
         }
 
-        public void UpdateColleague(ColleguePatchDto collegueDto)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "<StringComparison generates an InvalidOperationError from database>")]
+        public async void UpdateColleagueAsync(ColleguePatchDto collegueDto)
         {
+            if (collegueDto == null)
+            {
+                throw new CollegueInvalideException();
+            }
+
             try
             {
-                var collegue = _colleguesContext.Collegues.Single(c => string.Equals(c.Matricule, collegueDto.Matricule));
+                var collegue = _colleguesContext.Collegues
+                    .FirstOrDefault(c => string.Equals(c.Matricule, collegueDto.Matricule));
+
                 if (collegueDto.Email != null)
                 {
                     collegue.Email = collegueDto.Email;
@@ -37,7 +52,8 @@ namespace collegues_api.Repositories
                 {
                     collegue.PhotoUrl = collegueDto.PhotoUrl;
                 }
-                _colleguesContext.SaveChanges();
+                await _colleguesContext.SaveChangesAsync()
+                    .ConfigureAwait(false);
             }
             catch (Exception)
             {
@@ -45,22 +61,37 @@ namespace collegues_api.Repositories
             }
         }
 
-        public IEnumerable<string> GetColleagueMatriculesByNom(string nom)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "<StringComparison generates an InvalidOperationError from database>")]
+        public async Task<IEnumerable<string>> GetColleagueMatriculesByNomAsync(string nom)
         {
-            return _colleguesContext.Collegues.Where(c => string.Equals(c.Nom, nom)).Select(c => c.Matricule).ToList();
+            return await _colleguesContext.Collegues
+                .Where(c => string.Equals(c.Nom, nom))
+                .Select(c => c.Matricule)
+                .ToListAsync()
+                .ConfigureAwait(false);
         }
 
-        public Collegue FindColleagueByMatricule(string matricule)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "<StringComparison generates an InvalidOperationError from database>")]
+        public async Task<Collegue> FindColleagueByMatriculeAsync(string matricule)
         {
             try
             {
-                return _colleguesContext.Collegues.Where(c => string.Equals(c.Matricule, matricule)).Single();
+                if ((await _colleguesContext.Collegues.FirstOrDefaultAsync(c => c.Matricule.Equals(matricule)).ConfigureAwait(false)) != null)
+                {
+                    return await _colleguesContext.Collegues
+                       .FirstOrDefaultAsync(c => c.Matricule.Equals(matricule))
+                       .ConfigureAwait(false);
+                }
+                else
+                {
+                    throw new CollegueNonTrouveException();
+                }
             }
             catch (ArgumentNullException)
             {
-                throw new CollegueNonTrouveException("Erreur : aucun collègue trouvé pour ce matricule");
+                throw new CollegueNonTrouveException();
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
                 throw new ProblemeTechniqueException();
             }

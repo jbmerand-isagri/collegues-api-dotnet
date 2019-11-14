@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace collegues_api.Repositories
+namespace ColleguesApi.Repositories
 {
     [Serializable]
-    internal class ProblemeTechniqueException : Exception
+    public class ProblemeTechniqueException : Exception
     {
         public ProblemeTechniqueException()
         {

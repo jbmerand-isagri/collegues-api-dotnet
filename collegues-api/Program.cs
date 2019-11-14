@@ -1,13 +1,16 @@
 using System;
-using collegues_api.Configurations;
+using ColleguesApi.Configurations;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using System.Resources;
+using System.Reflection;
+using System.Globalization;
 
-namespace collegues_api
+namespace ColleguesApi
 {
-    public class Program
+    public sealed class Program
     {
         public static void Main(string[] args)
         {
@@ -28,10 +31,11 @@ namespace collegues_api
                 var context = services.GetRequiredService<ColleguesContext>();
                 context.Database.EnsureCreated();
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                var logger = services.GetRequiredService<ILogger<Program>>();
-                logger.LogError(ex, "An error occurred creating the DB.");
+                ResourceManager rm = new ResourceManager("fr-FR", Assembly.GetExecutingAssembly());
+                ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, rm.GetString("An error occurred creating the DB.", CultureInfo.CurrentCulture));
             }
         }
 
