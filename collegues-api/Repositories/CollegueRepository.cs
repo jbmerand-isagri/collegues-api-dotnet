@@ -24,41 +24,45 @@ namespace ColleguesApi.Repositories
             _colleguesContext = colleguesContext;
         }
 
-        public async void SaveColleagueAsync(Collegue collegue)
+        public async Task<int> SaveColleagueAsync(Collegue collegue)
         {
             _colleguesContext.Collegues.Add(collegue);
-            await _colleguesContext.SaveChangesAsync()
+            return await _colleguesContext
+                .SaveChangesAsync()
                 .ConfigureAwait(false);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "<StringComparison generates an InvalidOperationError from database>")]
-        public async void UpdateColleagueAsync(ColleguePatchDto collegueDto)
+        public async Task<int> UpdateColleagueAsync(ColleguePatchDto collegueDto)
         {
             if (collegueDto == null)
             {
                 throw new CollegueInvalideException();
             }
 
-            try
-            {
-                var collegue = _colleguesContext.Collegues
-                    .FirstOrDefault(c => string.Equals(c.Matricule, collegueDto.Matricule));
+            var collegue = await FindColleagueByMatriculeAsync(collegueDto.Matricule)
+                .ConfigureAwait(false);
 
-                if (collegueDto.Email != null)
-                {
-                    collegue.Email = collegueDto.Email;
-                }
-                if (collegueDto.PhotoUrl != null)
-                {
-                    collegue.PhotoUrl = collegueDto.PhotoUrl;
-                }
-                await _colleguesContext.SaveChangesAsync()
-                    .ConfigureAwait(false);
-            }
-            catch (Exception)
+            if (collegue == null)
             {
                 throw new CollegueNonTrouveException();
             }
+
+            if (collegueDto.Email != null)
+            {
+                collegue.Email = collegueDto.Email;
+            }
+
+            if (collegueDto.PhotoUrl != null)
+            {
+                collegue.PhotoUrl = collegueDto.PhotoUrl;
+            }
+
+            _colleguesContext.Entry(collegue).State = EntityState.Modified;
+
+            return await _colleguesContext
+                .SaveChangesAsync()
+                .ConfigureAwait(false);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "<StringComparison generates an InvalidOperationError from database>")]
@@ -76,11 +80,13 @@ namespace ColleguesApi.Repositories
         {
             try
             {
-                if ((await _colleguesContext.Collegues.FirstOrDefaultAsync(c => c.Matricule.Equals(matricule)).ConfigureAwait(false)) != null)
+                var collegue = await _colleguesContext.Collegues
+                    .FirstOrDefaultAsync(c => c.Matricule.Equals(matricule))
+                    .ConfigureAwait(false);
+
+                if (collegue != null)
                 {
-                    return await _colleguesContext.Collegues
-                       .FirstOrDefaultAsync(c => c.Matricule.Equals(matricule))
-                       .ConfigureAwait(false);
+                    return collegue;
                 }
                 else
                 {

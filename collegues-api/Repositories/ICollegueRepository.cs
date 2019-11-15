@@ -12,8 +12,8 @@ namespace ColleguesApi.Repositories
 
         Task<IEnumerable<string>> GetColleagueMatriculesByNomAsync(string nom);
 
-        void SaveColleagueAsync(Collegue collegue);
+        Task<int> SaveColleagueAsync(Collegue collegue);
 
-        void UpdateColleagueAsync(ColleguePatchDto collegueDto);
+        Task<int> UpdateColleagueAsync(ColleguePatchDto collegueDto);
     }
 }

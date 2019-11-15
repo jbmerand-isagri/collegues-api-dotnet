@@ -34,21 +34,24 @@ namespace ColleguesApi.Services
             return _collegueRepository.FindColleagueByMatriculeAsync(matricule);
         }
 
-        public Task<Collegue> AjouterUnCollegue(ColleguePostDto collegueDto)
+        public async Task<Collegue> AjouterUnCollegue(ColleguePostDto collegueDto)
         {
             if (collegueDto != null)
             {
                 var collegue = _mapper.Map<ColleguePostDto, Collegue>(collegueDto);
                 collegue.Matricule = Guid.NewGuid().ToString();
+
                 try
                 {
-                    _collegueRepository.SaveColleagueAsync(collegue);
+                    return await Task.Run(() => _collegueRepository
+                        .SaveColleagueAsync(collegue))
+                        .ContinueWith(antecedent => RechercherParMatricule(collegue.Matricule).Result, TaskScheduler.Default)
+                        .ConfigureAwait(false);
                 }
                 catch (Exception)
                 {
                     throw new ProblemeTechniqueException();
                 }
-                return RechercherParMatricule(collegue.Matricule);
             }
             else
             {
@@ -56,26 +59,15 @@ namespace ColleguesApi.Services
             }
         }
 
-        public Task<Collegue> ModifierCollegue(ColleguePatchDto collegueDto)
+        public async Task<Collegue> ModifierCollegue(ColleguePatchDto collegueDto)
         {
             if (collegueDto == null)
             {
                 throw new CollegueInvalideException();
             }
 
-            try
-            {
-                _collegueRepository.UpdateColleagueAsync(collegueDto);
-                return _collegueRepository.FindColleagueByMatriculeAsync(collegueDto.Matricule);
-            }
-            catch (ArgumentNullException)
-            {
-                throw new CollegueNonTrouveException();
-            }
-            catch (Exception e)
-            {
-                throw new ProblemeTechniqueException(e.Message);
-            }
+            await _collegueRepository.UpdateColleagueAsync(collegueDto).ConfigureAwait(false);
+            return await RechercherParMatricule(collegueDto.Matricule).ConfigureAwait(false);
         }
     }
 }

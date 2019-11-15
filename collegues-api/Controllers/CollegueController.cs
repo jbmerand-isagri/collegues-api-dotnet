@@ -82,30 +82,42 @@ namespace ColleguesApi.Controllers
         [HttpPatch("{matricule}")]
         public IActionResult PatchColleagueAsync(string matricule, [FromBody]ColleguePatchDto collegueDto)
         {
-            try
+            if (collegueDto != null)
             {
-                if (collegueDto != null)
+                collegueDto.Matricule = matricule;
+
+                try
                 {
-                    collegueDto.Matricule = matricule;
-                    var collegue = _collegueService.RechercherParMatricule(matricule);
-                    return Ok(_collegueService.ModifierCollegue(collegueDto).Result);
+                    var response = Ok(_collegueService.ModifierCollegue(collegueDto).Result);
+                    return response;
                 }
-                else
+                catch (CollegueNonTrouveException)
                 {
-                    throw new CollegueInvalideException();
+                    return NotFound();
+                }
+                catch (CollegueInvalideException)
+                {
+                    return BadRequest();
+                }
+                catch (ProblemeTechniqueException)
+                {
+                    return BadRequest();
+                }
+                catch (AggregateException e)
+                {
+                    if (e.InnerException.GetType() == typeof(CollegueNonTrouveException))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        return BadRequest();
+                    }
                 }
             }
-            catch (CollegueNonTrouveException)
+            else
             {
-                return NotFound();
-            }
-            catch (CollegueInvalideException)
-            {
-                return BadRequest();
-            }
-            catch (ProblemeTechniqueException)
-            {
-                return BadRequest();
+                throw new CollegueInvalideException();
             }
         }
     }
