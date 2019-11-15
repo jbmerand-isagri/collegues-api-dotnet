@@ -1,4 +1,5 @@
 ﻿using ColleguesApi.Controllers;
+using ColleguesApi.Controllers.Dto;
 using ColleguesApi.Models;
 using ColleguesApi.Services;
 using FluentAssertions;
@@ -69,6 +70,30 @@ namespace ColleguesApiTests.Controllers
                 .BeOfType<BadRequestResult>();
         }
 
+        [TestMethod]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "<TestMethod>")]
+        public void PatchNewCollegue_WhenCollegueNonTrouveExceptionIsThrownByCollegueService_ShouldReturnNotFoundResult()
+        {
+            // Arrange
+            var collegueService = Mock.Of<ICollegueService>();
+
+            using var collegueController = new CollegueController(collegueService);
+
+            var collegueDto = GetAValidColleguePatchDto();
+            collegueDto.Matricule = null;
+
+            Mock.Get(collegueService)
+                .Setup(c => c.ModifierCollegue(It.IsAny<ColleguePatchDto>()))
+                .Throws(new CollegueNonTrouveException());
+
+            // Act
+            var result = collegueController.PatchColleagueAsync("matricule", collegueDto);
+
+            // Assert
+            result.Should()
+                .BeOfType<NotFoundResult>();
+        }
+
         #endregion unit testing methods
 
         #region non testing methods
@@ -81,6 +106,11 @@ namespace ColleguesApiTests.Controllers
         public static Collegue GetAValidCollegue()
         {
             return new Collegue(Guid.NewGuid().ToString(), "Doe", "John", "john.doe@mail.com", new DateTime(1984, 8, 2), new Uri("https://secure.i.telegraph.co.uk/multimedia/archive/03029/Becks1_5_3029072b.jpg"));
+        }
+
+        public static ColleguePatchDto GetAValidColleguePatchDto()
+        {
+            return new ColleguePatchDto(Guid.NewGuid().ToString(), "john.doe@mail.com", new Uri("https://secure.i.telegraph.co.uk/multimedia/archive/03029/Becks1_5_3029072b.jpg"));
         }
 
         #endregion non testing methods

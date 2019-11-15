@@ -15,6 +15,16 @@ namespace ColleguesApiTests.Services
     [TestClass]
     public class CollegueServiceTest
     {
+        private IMapper _mapper;
+
+        [TestInitialize]
+        public void Setup()
+        {
+            _mapper = new MapperConfiguration(cfg =>
+                cfg.CreateMap<ColleguePostDto, Collegue>())
+                .CreateMapper();
+        }
+
         [TestMethod]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "<TestMethod>")]
         public void RechercherParMatricule_WithOneColleagueWithThisMatricule_ShouldReturnOneColleague()
@@ -28,9 +38,7 @@ namespace ColleguesApiTests.Services
                 .Setup(c => c.FindColleagueByMatriculeAsync(collegue.Matricule))
                 .Returns(Task.FromResult(collegue));
 
-            var mapperMock = Mock.Of<IMapper>();
-
-            var collegueService = new CollegueService(mapperMock, collegueRepositoryMock);
+            var collegueService = new CollegueService(_mapper, collegueRepositoryMock);
 
             // Act
             var result = collegueService.RechercherParMatricule(collegue.Matricule);
@@ -56,9 +64,7 @@ namespace ColleguesApiTests.Services
                 .Setup(c => c.GetColleagueMatriculesByNomAsync("Dupuis"))
                 .Returns(Task.FromResult((IEnumerable<string>)new List<string> { collegue1.Matricule, collegue3.Matricule }));
 
-            var mapperMock = Mock.Of<IMapper>();
-
-            var collegueService = new CollegueService(mapperMock, collegueRepositoryMock);
+            var collegueService = new CollegueService(_mapper, collegueRepositoryMock);
 
             // Act
             var result = collegueService.RechercherParNom("Dupuis");
@@ -69,34 +75,31 @@ namespace ColleguesApiTests.Services
 
         [TestMethod]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "<TestMethod>")]
-        public void AjouterUnCollegue_WhenColleagueInfosAreValid_ShouldNotThrowExceptionsAndReturnsAColleague()
+        public void AjouterUnCollegue_WhenColleagueInfosAreValid_ShouldNotThrowException()
         {
             // Arrange
             var collegueDto = new ColleguePostDto("Dupuis", "Jean", "jean.dupuis@mail.com", new DateTime(1980, 1, 18), new Uri("https://img.huffingtonpost.com/asset/5901e5881400002000a9c22f.jpeg?ops=scalefit_720_noupscale"));
+
             var collegue = new Collegue(null, "Dupuis", "Jean", "jean.dupuis@mail.com", new DateTime(1980, 1, 18), new Uri("https://img.huffingtonpost.com/asset/5901e5881400002000a9c22f.jpeg?ops=scalefit_720_noupscale"));
 
             var collegueRepositoryMock = Mock.Of<ICollegueRepository>();
-            var mapperMock = Mock.Of<IMapper>();
-            var collegueServiceMock = Mock.Of<ICollegueService>();
 
-            Mock.Get(mapperMock)
-                .Setup(m => m.Map<ColleguePostDto, Collegue>(collegueDto))
-                .Returns(collegue);
+            var collegueServiceMock = Mock.Of<ICollegueService>();
 
             Mock.Get(collegueRepositoryMock)
                 .Setup(c => c.SaveColleagueAsync(It.IsAny<Collegue>()))
-                .Verifiable();
+                .Returns(Task.FromResult(1));
 
             Mock.Get(collegueServiceMock)
                 .Setup(c => c.RechercherParMatricule(It.IsAny<string>()))
-                .Verifiable();
+                .Returns(Task.FromResult(collegue));
 
-            var collegueService = new CollegueService(mapperMock, collegueRepositoryMock);
+            var collegueService = new CollegueService(_mapper, collegueRepositoryMock);
 
             // Act
             var result = collegueService.AjouterUnCollegue(collegueDto);
 
-            // Assert no exception
+            // Assert (no exception)
         }
     }
 }
